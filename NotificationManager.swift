@@ -1,16 +1,17 @@
+import Foundation
 import UserNotifications
 import AVFoundation
 
 class NotificationManager {
     static let shared = NotificationManager()
-    var audioPlayer: AVAudioPlayer?
+    private var audioPlayer: AVAudioPlayer?
     
     private init() {
         requestAuthorization()
         setupAudioSession()
     }
     
-    func requestAuthorization() {
+    private func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
                 print("通知の許可を得ました")
@@ -31,19 +32,19 @@ class NotificationManager {
         let content = UNMutableNotificationContent()
         content.title = "アラーム"
         content.body = alarm.label.isEmpty ? "起床時間です" : alarm.label
-        content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: "\(alarm.soundName).wav"))
+        content.sound = UNNotificationSound.default
         
         // 次の通知時間を計算
         let components = Calendar.current.dateComponents([.hour, .minute], from: alarm.time)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: !alarm.daysOfWeek.isEmpty)
         
-        let request = UNNotificationRequest(identifier: alarm.id.uuidString, content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: alarm.id, content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
     }
     
     func cancelNotification(for alarm: Alarm) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.id.uuidString])
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.id])
     }
     
     func playAlarmSound(_ soundName: String) {
@@ -51,7 +52,7 @@ class NotificationManager {
         
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.numberOfLoops = -1 // 無限ループ
+            audioPlayer?.numberOfLoops = -1  // 無限ループ
             audioPlayer?.play()
         } catch {
             print("音声再生エラー: \(error)")

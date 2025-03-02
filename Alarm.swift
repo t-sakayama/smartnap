@@ -1,5 +1,7 @@
-struct Alarm: Identifiable, Codable {
-    let id: UUID
+import Foundation
+
+class Alarm: Identifiable, Codable {
+    let id: String
     var time: Date
     var isEnabled: Bool
     var label: String
@@ -9,7 +11,7 @@ struct Alarm: Identifiable, Codable {
     var snoozeInterval: Int  // 分単位
     
     init(
-        id: UUID = UUID(),
+        id: String = UUID().uuidString,
         time: Date = Date(),
         isEnabled: Bool = true,
         label: String = "",

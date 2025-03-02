@@ -1,6 +1,11 @@
+import Foundation
+import SwiftUI
+import UserNotifications
+
 class AlarmViewModel: ObservableObject {
     @Published var alarms: [Alarm] = []
     private let userDefaults = UserDefaults.standard
+    private let notificationManager = NotificationManager.shared
     
     init() {
         loadAlarms()
@@ -24,21 +29,21 @@ class AlarmViewModel: ObservableObject {
     func addAlarm(_ alarm: Alarm) {
         alarms.append(alarm)
         saveAlarms()
-        scheduleNotification(for: alarm)
+        notificationManager.scheduleNotification(for: alarm)
     }
     
     func updateAlarm(_ alarm: Alarm) {
         if let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
             alarms[index] = alarm
             saveAlarms()
-            scheduleNotification(for: alarm)
+            notificationManager.scheduleNotification(for: alarm)
         }
     }
     
     func deleteAlarm(_ alarm: Alarm) {
         alarms.removeAll { $0.id == alarm.id }
         saveAlarms()
-        cancelNotification(for: alarm)
+        notificationManager.cancelNotification(for: alarm)
     }
     
     func toggleAlarm(_ alarm: Alarm) {
@@ -46,9 +51,9 @@ class AlarmViewModel: ObservableObject {
             alarms[index].isEnabled.toggle()
             saveAlarms()
             if alarms[index].isEnabled {
-                scheduleNotification(for: alarms[index])
+                notificationManager.scheduleNotification(for: alarms[index])
             } else {
-                cancelNotification(for: alarms[index])
+                notificationManager.cancelNotification(for: alarms[index])
             }
         }
     }
